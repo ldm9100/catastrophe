@@ -1,15 +1,15 @@
-import prisma from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
-  const report = await prisma.report.findUnique({ where: { id } });
+  const { id } = await params;
+  const report = await prisma.report.findUnique({ where: { id: Number(id) } });
 
   if (!report) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   return NextResponse.json(report);
@@ -17,18 +17,18 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
+  const { id } = await params;
   const { password } = await req.json();
 
-  const report = await prisma.report.findUnique({ where: { id } });
+  const report = await prisma.report.findUnique({ where: { id: Number(id) } });
 
   if (!report || report.password !== password) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  await prisma.report.delete({ where: { id } });
+  await prisma.report.delete({ where: { id: Number(id) } });
   return NextResponse.json({ success: true });
 }
 
@@ -37,18 +37,16 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-
-  const nid = Number(id);
   const { content, password } = await req.json();
 
-  const report = await prisma.report.findUnique({ where: { id: nid } });
+  const report = await prisma.report.findUnique({ where: { id: Number(id) } });
 
   if (!report || report.password !== password) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
   const updated = await prisma.report.update({
-    where: { id: nid },
+    where: { id: Number(id) },
     data: { content },
   });
 
