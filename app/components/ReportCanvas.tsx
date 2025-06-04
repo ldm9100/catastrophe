@@ -2,71 +2,127 @@
 
 import { useState } from "react";
 import ReportButton from "./ReportButton";
-import ReportDialog from "./ReportDialog";
+import useSWR from "swr";
+import { fetcher } from "@/lib/utils";
+import { Loader2Icon, PlusIcon } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import ReportDrawer from "./ReportDrawer";
 
 type Report = {
-  id: string;
-  x: number;
-  y: number;
+  id: number;
   content: string;
+  lat: number;
+  lng: number;
 };
 
+export type LatLng = { lat: number; lng: number };
+type XYRatio = { x: number; y: number };
+
+// 중심 좌표 (서울) 및 줌 수준 시뮬레이션, 지도 연동 전 임시 조치
+const center: LatLng = { lat: 37.5665, lng: 126.978 };
+const zoom = 12;
+
+// 화면 비율 → 위경도 변환
+function toLatLng(xRatio: number, yRatio: number): LatLng {
+  const lat = center.lat - (yRatio - 0.5) * (1 / zoom);
+  const lng = center.lng + (xRatio - 0.5) * (1 / zoom);
+  return { lat, lng };
+}
+
+// 위경도 → 화면 비율 변환
+function toXYRatio(lat: number, lng: number): XYRatio {
+  const x = 0.5 + (lng - center.lng) * zoom;
+  const y = 0.5 - (lat - center.lat) * zoom;
+  return { x, y };
+}
+
 export default function ReportCanvas() {
-  const [reports, setReports] = useState<Report[]>([]);
-  const [selectedPos, setSelectedPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const [showDialog, setShowDialog] = useState(false);
+  const [selectedPos, setSelectedPos] = useState<LatLng | null>(null);
+  const [showDrawer, setShowDrawer] = useState(false);
 
+  // 1. 초기 제보 목록 불러오기
+  const {
+    data: reports,
+    error,
+    isLoading,
+  } = useSWR<Report[]>("/api/reports", fetcher);
+
+  // 2. 화면 클릭 → 위경도 추출
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (showDrawer) return;
+    
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setSelectedPos({ x, y });
+    const xRatio = (e.clientX - rect.left) / rect.width;
+    const yRatio = (e.clientY - rect.top) / rect.height;
+    const pos = toLatLng(xRatio, yRatio);
+    if (selectedPos) {
+      setSelectedPos(null);
+    } else {
+      setSelectedPos(pos);
+    }
   };
 
-  const handleSubmit = (content: string) => {
-    if (!selectedPos) return;
-    setReports((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), x: selectedPos.x, y: selectedPos.y, content },
-    ]);
-    setSelectedPos(null);
-    setShowDialog(false);
-  };
+  if (error) toast.error("네트워크 에러");
 
   return (
     <div className="relative w-full h-full bg-zinc-100" onClick={handleClick}>
-      {/* 제보 버튼들 */}
-      {reports.map((r) => (
-        <ReportButton key={r.id} x={r.x} y={r.y} content={r.content} />
-      ))}
+      {/* 기존 제보들 */}
+      {(reports ?? []).map((r) => {
+        const { x, y } = toXYRatio(r.lat, r.lng);
+        return <ReportButton key={r.id} x={x} y={y} content={r.content} />;
+      })}
 
-      {/* + 말풍선 */}
-      {selectedPos && (
-        <button
-          className="absolute w-6 h-6 bg-blue-500 text-white rounded-full text-sm"
-          style={{
-            left: `${selectedPos.x * 100}%`,
-            top: `${selectedPos.y * 100}%`,
-            transform: "translate(-50%, -50%)",
-          }}
-          onClick={(e) => {
-            e.stopPropagation(); // 외부 클릭 이벤트 막기
-            setShowDialog(true);
-          }}
-        >
-          +
-        </button>
-      )}
+      {/* + 버튼 */}
+      {selectedPos &&
+        (() => {
+          const { x, y } = toXYRatio(selectedPos.lat, selectedPos.lng);
+          return (
+            <TooltipProvider>
+              <Tooltip open>
+                <TooltipTrigger asChild>
+                  <div
+                    className="absolute w-3 h-3 bg-blue-500 rounded-full z-40"
+                    style={{
+                      left: `${x * 100}%`,
+                      top: `${y * 100}%`,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                </TooltipTrigger>
+                <TooltipContent
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDrawer(true);
+                  }}
+                >
+                  <div className="flex items-center gap-1">
+                    <p className="text-base font-medium select-none">
+                      제보하기
+                    </p>
+                    <PlusIcon size={16} strokeWidth={3} />
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        })()}
 
-      {/* 제보 입력 모달 */}
-      {showDialog && selectedPos && (
-        <ReportDialog
-          onClose={() => setShowDialog(false)}
-          onSubmit={handleSubmit}
-        />
+      <ReportDrawer
+        open={showDrawer}
+        onOpenChange={setShowDrawer}
+        selectedPos={selectedPos}
+      />
+
+      {isLoading && (
+        <div className="absolute inset-0 bg-black opacity-25 z-50 flex items-center justify-center">
+          <Loader2Icon className="w-8 h-8 text-white animate-spin" />
+        </div>
       )}
     </div>
   );
