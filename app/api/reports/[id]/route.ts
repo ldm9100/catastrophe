@@ -34,19 +34,21 @@ export async function DELETE(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
+  const { id } = await params;
+
+  const nid = Number(id);
   const { content, password } = await req.json();
 
-  const report = await prisma.report.findUnique({ where: { id } });
+  const report = await prisma.report.findUnique({ where: { id: nid } });
 
   if (!report || report.password !== password) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const updated = await prisma.report.update({
-    where: { id },
+    where: { id: nid },
     data: { content },
   });
 
