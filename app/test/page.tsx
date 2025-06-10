@@ -4,6 +4,6 @@ export default function Test() {
     return <div>
         <p>test page</p>
         <p> hello world</p>
-        <Map/>
+        {/*<Map reportCoordinates={[]}/>*/}
     </div>;
 }

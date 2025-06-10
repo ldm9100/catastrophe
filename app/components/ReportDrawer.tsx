@@ -12,11 +12,12 @@ import { useState } from "react";
 import { LatLng } from "./ReportCanvas";
 import { toast } from "sonner";
 import { mutate } from "swr";
+import {Coordinate} from "@/types/Coordinate";
 
 interface ReportDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedPos: LatLng | null;
+  selectedPos?: Coordinate;
 }
 
 export default function ReportDrawer({
@@ -41,8 +42,8 @@ export default function ReportDrawer({
       body: JSON.stringify({
         content,
         password,
-        lat: selectedPos.lat,
-        lng: selectedPos.lng,
+        lat: selectedPos.latitude,
+        lng: selectedPos.longitude,
       }),
     });
 

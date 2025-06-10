@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import ReportButton from "./ReportButton";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import ReportDrawer from "./ReportDrawer";
 import Map from "./Map"
+import {Coordinate} from "@/types/Coordinate";
 
 type Report = {
   id: number;
@@ -46,6 +47,7 @@ function toXYRatio(lat: number, lng: number): XYRatio {
 export default function ReportCanvas() {
   const [selectedPos, setSelectedPos] = useState<LatLng | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [selectedMapCoordinates, setSelectedMapCoordinates] = useState<Coordinate>()
 
   // 1. 초기 제보 목록 불러오기
   const {
@@ -54,6 +56,7 @@ export default function ReportCanvas() {
     isLoading,
   } = useSWR<Report[]>("/api/reports", fetcher);
 
+  // TODO: 리팩토링 잘 하면 얘 이제 필요없을 것 같긴한데 일단 그냥 냅둠
   // 2. 화면 클릭 → 위경도 추출
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showDrawer) return;
@@ -73,13 +76,10 @@ export default function ReportCanvas() {
 
   return (
     <div className="relative w-full h-full bg-zinc-100" onClick={handleClick}>
-      <Map/>
-
-      {/* 기존 제보들 */}
-      {(reports ?? []).map((r) => {
-        const { x, y } = toXYRatio(r.lat, r.lng);
-        return <ReportButton key={r.id} x={x} y={y} content={r.content} />;
-      })}
+      <Map
+          reportCoordinates={reports?.map((report): Coordinate => ({ longitude: report.lng, latitude: report.lat })) ?? []}
+          setClickedCoordinates={setSelectedMapCoordinates}
+      />
 
       {/* + 버튼 */}
       {selectedPos &&
@@ -119,7 +119,7 @@ export default function ReportCanvas() {
       <ReportDrawer
         open={showDrawer}
         onOpenChange={setShowDrawer}
-        selectedPos={selectedPos}
+        selectedPos={selectedMapCoordinates}
       />
 
       {isLoading && (
