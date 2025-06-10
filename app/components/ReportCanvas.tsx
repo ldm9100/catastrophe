@@ -16,7 +16,7 @@ import ReportDrawer from "./ReportDrawer";
 import Map from "./Map"
 import {Coordinate} from "@/types/Coordinate";
 
-type Report = {
+export type Report = {
   id: number;
   content: string;
   lat: number;
@@ -48,6 +48,7 @@ export default function ReportCanvas() {
   const [selectedPos, setSelectedPos] = useState<LatLng | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedMapCoordinates, setSelectedMapCoordinates] = useState<Coordinate>()
+  const [currentReport, setCurrentReport] = useState<Report>()
 
   // 1. 초기 제보 목록 불러오기
   const {
@@ -77,8 +78,9 @@ export default function ReportCanvas() {
   return (
     <div className="relative w-full h-full bg-zinc-100" onClick={handleClick}>
       <Map
-          reportCoordinates={reports?.map((report): Coordinate => ({ longitude: report.lng, latitude: report.lat })) ?? []}
+          reports={reports ?? []}
           setClickedCoordinates={setSelectedMapCoordinates}
+          setCurrentReport={setCurrentReport}
       />
 
       {/* + 버튼 */}
