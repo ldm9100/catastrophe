@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ReportDrawer from "./ReportDrawer";
+import Map from "./Map"
 
 type Report = {
   id: number;
@@ -56,7 +57,7 @@ export default function ReportCanvas() {
   // 2. 화면 클릭 → 위경도 추출
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showDrawer) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const xRatio = (e.clientX - rect.left) / rect.width;
     const yRatio = (e.clientY - rect.top) / rect.height;
@@ -72,6 +73,8 @@ export default function ReportCanvas() {
 
   return (
     <div className="relative w-full h-full bg-zinc-100" onClick={handleClick}>
+      <Map/>
+
       {/* 기존 제보들 */}
       {(reports ?? []).map((r) => {
         const { x, y } = toXYRatio(r.lat, r.lng);

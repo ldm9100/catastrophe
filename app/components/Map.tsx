@@ -30,8 +30,7 @@ const Map = () => {
 
     return (
         <>
-            <div style={{width: '100%', height: '500px'}}>
-                <p>map</p>
+            <div style={{width: '100%', height: '100%'}}>
                 <div ref={mapRef} style={{width: '100%', height: '100%'}}/>
             </div>
         </>
