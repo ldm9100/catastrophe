@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Script from "next/script";
+import {BottomNavigationBar} from "@/app/components/BottomNavigationBar";
 
 export const metadata: Metadata = {
   title: "SNU DISASTER",
@@ -24,7 +25,10 @@ export default function RootLayout({
       </head>
       <body>
         <main className="w-full flex items-center justify-center h-screen">
-          <div className="w-full max-w-md bg-zinc-100 h-full">{children}</div>
+          <div className="w-full max-w-md bg-zinc-100 h-full">
+              {children}
+              <BottomNavigationBar/>
+          </div>
         </main>
         <Toaster />
       </body>
