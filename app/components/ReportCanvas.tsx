@@ -14,6 +14,7 @@ import {
 import ReportDrawer from "./ReportDrawer";
 import Map from "./Map"
 import {Coordinate} from "@/types/Coordinate";
+import {Header} from "@/app/components/Header";
 
 export type Report = {
   id: number;
@@ -78,6 +79,8 @@ export default function ReportCanvas() {
 
   return (
     <div className="relative w-full h-full bg-zinc-100" onClick={handleClick}>
+      <Header title={'지도'}/>
+
       <Map
           reports={reports ?? []}
           setClickedCoordinates={setSelectedMapCoordinates}

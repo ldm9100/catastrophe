@@ -9,11 +9,10 @@ export const BottomNavigationBar = () => {
     return <div className={"w-full max-w-md"} style={{
         bottom: 0,
         position: 'absolute',
-        zIndex: 1,
+        zIndex: 100,
         background: '#578FCA',
         height: 60,
         display: 'flex',
-        flexDirection: 'horizontal',
         alignItems: 'center',
         justifyContent: 'space-evenly',
     }}>
