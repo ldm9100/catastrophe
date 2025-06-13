@@ -1,7 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
-import ReportButton from "./ReportButton";
+import {useState} from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
 import { Loader2Icon, PlusIcon } from "lucide-react";
@@ -31,7 +30,7 @@ const center: LatLng = { lat: 37.5665, lng: 126.978 };
 const zoom = 12;
 
 // 화면 비율 → 위경도 변환
-function toLatLng(xRatio: number, yRatio: number): LatLng {
+export function toLatLng(xRatio: number, yRatio: number): LatLng {
   const lat = center.lat - (yRatio - 0.5) * (1 / zoom);
   const lng = center.lng + (xRatio - 0.5) * (1 / zoom);
   return { lat, lng };
@@ -49,6 +48,7 @@ export default function ReportCanvas() {
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedMapCoordinates, setSelectedMapCoordinates] = useState<Coordinate>()
   const [currentReport, setCurrentReport] = useState<Report>()
+  const [showCurrentReport, setShowCurrentReport] = useState(false)
 
   // 1. 초기 제보 목록 불러오기
   const {
@@ -57,7 +57,6 @@ export default function ReportCanvas() {
     isLoading,
   } = useSWR<Report[]>("/api/reports", fetcher);
 
-  // TODO: 리팩토링 잘 하면 얘 이제 필요없을 것 같긴한데 일단 그냥 냅둠
   // 2. 화면 클릭 → 위경도 추출
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (showDrawer) return;
@@ -71,6 +70,8 @@ export default function ReportCanvas() {
     } else {
       setSelectedPos(pos);
     }
+
+    setShowCurrentReport(false)
   };
 
   if (error) toast.error("네트워크 에러");
@@ -81,6 +82,9 @@ export default function ReportCanvas() {
           reports={reports ?? []}
           setClickedCoordinates={setSelectedMapCoordinates}
           setCurrentReport={setCurrentReport}
+          setShowCurrentReport={setShowCurrentReport}
+          showCurrentReport={showCurrentReport}
+          setSelectedPos={setSelectedPos}
       />
 
       {/* + 버튼 */}
@@ -107,10 +111,18 @@ export default function ReportCanvas() {
                   }}
                 >
                   <div className="flex items-center gap-1">
-                    <p className="text-base font-medium select-none">
-                      제보하기
-                    </p>
-                    <PlusIcon size={16} strokeWidth={3} />
+                    {showCurrentReport && currentReport ?
+                        <p className="text-base font-medium select-none">
+                          {currentReport?.content}
+                        </p>
+                        :
+                        <>
+                          <p className="text-base font-medium select-none">
+                            제보하기
+                          </p>
+                          <PlusIcon size={16} strokeWidth={3}/>
+                        </>
+                    }
                   </div>
                 </TooltipContent>
               </Tooltip>

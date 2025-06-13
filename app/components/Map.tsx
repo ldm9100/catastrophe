@@ -1,8 +1,8 @@
 'use client';
 
-import {useEffect, useRef} from "react";
+import React, {RefObject, useEffect, useRef} from "react";
 import {Coordinate} from "@/types/Coordinate";
-import {Report} from '../components/ReportCanvas'
+import {LatLng, Report, toLatLng} from '../components/ReportCanvas'
 
 const INITIAL_LAT = 37.45291124168444
 const INITIAL_LON = 126.95165625784453
@@ -13,9 +13,13 @@ interface MapProps {
     reports: Array<Report>
     setClickedCoordinates: (coord: Coordinate) => void
     setCurrentReport: (report?: Report) => void
+    showCurrentReport: boolean
+    setShowCurrentReport: React.Dispatch<React.SetStateAction<boolean>>
+    setSelectedPos: React.Dispatch<React.SetStateAction<LatLng>>
 }
 
-const Map = ({ reports, setClickedCoordinates, setCurrentReport }: MapProps) => {
+const Map = (props: MapProps) => {
+    const { reports, setClickedCoordinates, setCurrentReport, setShowCurrentReport, setSelectedPos } = props
     const mapRef = useRef<HTMLDivElement>(null!)
     const mapInstance = useRef<naver.maps.Map | null>(null)
 
@@ -54,9 +58,18 @@ const Map = ({ reports, setClickedCoordinates, setCurrentReport }: MapProps) => 
         })
 
         // get report on marker click
-        naver.maps.Event.addListener(marker, 'click', () => {
+        naver.maps.Event.addListener(marker, 'click', (e) => {
+            e.domEvent.stopPropagation()
+
+            const rect = mapRef.current.getBoundingClientRect();
+            const xRatio = (e.domEvent.clientX - rect.left) / rect.width;
+            const yRatio = (e.domEvent.clientY - rect.top) / rect.height;
+            const pos = toLatLng(xRatio, yRatio);
+            setSelectedPos(pos)
+
             const report = reports.find((report) => report.lat === latitude && report.lng === longitude)
             setCurrentReport(report)
+            setShowCurrentReport(true)
         })
     }
 
