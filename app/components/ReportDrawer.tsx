@@ -9,7 +9,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { LatLng } from "./ReportCanvas";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import {Coordinate} from "@/types/Coordinate";

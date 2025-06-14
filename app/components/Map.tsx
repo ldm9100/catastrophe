@@ -1,13 +1,11 @@
 'use client';
 
-import React, {RefObject, useEffect, useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {Coordinate} from "@/types/Coordinate";
 import {LatLng, Report, toLatLng} from '../components/ReportCanvas'
 
 const INITIAL_LAT = 37.45291124168444
 const INITIAL_LON = 126.95165625784453
-const MARKER_LAT = 37.45008245372354
-const MARKER_LON = 126.95263000235825
 
 interface MapProps {
     reports: Array<Report>
@@ -15,7 +13,7 @@ interface MapProps {
     setCurrentReport: (report?: Report) => void
     showCurrentReport: boolean
     setShowCurrentReport: React.Dispatch<React.SetStateAction<boolean>>
-    setSelectedPos: React.Dispatch<React.SetStateAction<LatLng>>
+    setSelectedPos: React.Dispatch<React.SetStateAction<LatLng | null>>
 }
 
 const Map = (props: MapProps) => {
