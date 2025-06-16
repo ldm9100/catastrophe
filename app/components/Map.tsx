@@ -3,6 +3,7 @@
 import React, {useEffect, useRef} from "react";
 import {Coordinate} from "@/types/Coordinate";
 import {LatLng, Report, toLatLng} from '../components/ReportCanvas'
+import {DateTime} from "@/util/DateTime";
 
 const INITIAL_LAT = 37.45291124168444
 const INITIAL_LON = 126.95165625784453
@@ -36,7 +37,7 @@ const Map = (props: MapProps) => {
     // set initial markers
     useEffect(() => {
         if (reports.length < 1) return
-        reports.map(({ lat, lng }) => addMarker({ longitude: lng, latitude: lat }))
+        reports.map(({ lat, lng, createdAt }) => addMarker({ longitude: lng, latitude: lat }, createdAt))
     }, [reports]);
 
     // click map coordinates
@@ -47,12 +48,24 @@ const Map = (props: MapProps) => {
         })
     }, []);
 
-    const addMarker = ({ longitude, latitude }: Coordinate) => {
+    const addMarker = (coord: Coordinate, createdAt: string ) => {
         if (mapInstance.current === null) return
+
+        const { longitude, latitude } = coord
+        const color = DateTime.getColorByTime(createdAt)
 
         const marker = new naver.maps.Marker({
             position: new naver.maps.LatLng(latitude, longitude),
             map: mapInstance.current!,
+            icon: {
+                content: `<div style="
+                    background-color: ${color};
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                "></div>`
+            },
         })
 
         // get report on marker click

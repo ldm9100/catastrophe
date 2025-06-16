@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import useSWR from "swr";
 import { fetcher } from "@/lib/utils";
 import { Loader2Icon, PlusIcon, X } from "lucide-react";
@@ -15,12 +15,14 @@ import ReportDrawer from "./ReportDrawer";
 import Map from "./Map"
 import {Coordinate} from "@/types/Coordinate";
 import {Header} from "@/app/components/Header";
+import {DateTime} from "@/util/DateTime";
 
 export type Report = {
   id: number;
   content: string;
   lat: number;
   lng: number;
+  createdAt: string;
 };
 
 export type LatLng = { lat: number; lng: number };
@@ -116,9 +118,14 @@ export default function ReportCanvas() {
                   <div className="flex items-center gap-1">
                     {showCurrentReport && currentReport ?
                         <>
-                          <p className="text-base font-medium select-none">
-                            {currentReport?.content}
-                          </p>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <p className="text-base font-medium select-none">
+                              {currentReport?.content}
+                            </p>
+                            <p className="text-base text-xs select-none">
+                              {DateTime.getRelativeTimeString(currentReport?.createdAt)}
+                            </p>
+                          </div>
                           <X size={16} onClick={(e) => {
                             e.stopPropagation()
                             alert('기능 개발 중')
@@ -127,7 +134,7 @@ export default function ReportCanvas() {
                         :
                         <>
                           <p className="text-base font-medium select-none">
-                          제보하기
+                            제보하기
                           </p>
                           <PlusIcon size={16} strokeWidth={3}/>
                         </>
