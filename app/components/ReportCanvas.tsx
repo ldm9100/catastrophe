@@ -159,7 +159,7 @@ export default function ReportCanvas() {
         selectedPos={selectedMapCoordinates}
       />
 
-      <DeleteDrawer open={showDeleteDrawer} onOpenChange={setShowDeleteDrawer} reportID={currentReport?.id}/>
+      <DeleteDrawer open={showDeleteDrawer} onOpenChange={setShowDeleteDrawer} reportID={currentReport?.id.toString()}/>
 
       {isLoading && (
         <div className="absolute inset-0 bg-black opacity-25 z-50 flex items-center justify-center">
