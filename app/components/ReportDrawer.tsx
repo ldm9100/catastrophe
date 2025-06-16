@@ -12,6 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { mutate } from "swr";
 import {Coordinate} from "@/types/Coordinate";
+import {PlusIcon} from "lucide-react";
 
 interface ReportDrawerProps {
   open: boolean;
@@ -77,6 +78,10 @@ export default function ReportDrawer({
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
+          <Button onClick={() => alert('기능 개발중')} disabled={loading}>
+            {'사진 추가'}
+            <PlusIcon size={16} strokeWidth={3}/>
+          </Button>
         </div>
         <DrawerFooter>
           <Button onClick={handleSubmit} disabled={loading}>
