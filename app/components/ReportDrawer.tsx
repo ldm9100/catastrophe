@@ -78,7 +78,7 @@ export default function ReportDrawer({
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
-          <Button onClick={() => alert('기능 개발중')} disabled={loading}>
+          <Button onClick={() => alert('기능 개발 중')} disabled={loading}>
             {'사진 추가'}
             <PlusIcon size={16} strokeWidth={3}/>
           </Button>
