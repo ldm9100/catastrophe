@@ -16,6 +16,8 @@ import Map from "./Map"
 import {Coordinate} from "@/types/Coordinate";
 import {Header} from "@/app/components/Header";
 import {DateTime} from "@/util/DateTime";
+import {Spacer} from "@/components/ui/spacer";
+import {DeleteDrawer} from "@/app/components/DeleteDrawer";
 
 export type Report = {
   id: number;
@@ -49,9 +51,11 @@ function toXYRatio(lat: number, lng: number): XYRatio {
 export default function ReportCanvas() {
   const [selectedPos, setSelectedPos] = useState<LatLng | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [showDeleteDrawer, setShowDeleteDrawer] = useState(false)
   const [selectedMapCoordinates, setSelectedMapCoordinates] = useState<Coordinate>()
   const [currentReport, setCurrentReport] = useState<Report>()
   const [showCurrentReport, setShowCurrentReport] = useState(false)
+
 
   // 1. 초기 제보 목록 불러오기
   const {
@@ -119,17 +123,20 @@ export default function ReportCanvas() {
                     {showCurrentReport && currentReport ?
                         <>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <p className="text-base font-medium select-none">
-                              {currentReport?.content}
-                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                              <p className="text-base font-medium select-none">
+                                {currentReport?.content}
+                              </p>
+                              <Spacer width={5}/>
+                              <X size={16} onClick={(e) => {
+                                e.stopPropagation()
+                                setShowDeleteDrawer(true)
+                              }}/>
+                            </div>
                             <p className="text-base text-xs select-none">
                               {DateTime.getRelativeTimeString(currentReport?.createdAt)}
                             </p>
                           </div>
-                          <X size={16} onClick={(e) => {
-                            e.stopPropagation()
-                            alert('기능 개발 중')
-                          }}/>
                         </>
                         :
                         <>
@@ -151,6 +158,8 @@ export default function ReportCanvas() {
         onOpenChange={setShowDrawer}
         selectedPos={selectedMapCoordinates}
       />
+
+      <DeleteDrawer open={showDeleteDrawer} onOpenChange={setShowDeleteDrawer} reportID={currentReport?.id}/>
 
       {isLoading && (
         <div className="absolute inset-0 bg-black opacity-25 z-50 flex items-center justify-center">
